@@ -1,0 +1,35 @@
+services:
+  # This is your Spring Boot application
+  app:
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    ports:
+      # Map your host port 8080 to the container's port 8080
+      - "8080:8080"
+    # Make the app wait for the 'db' service to be ready
+    depends_on:
+      - db
+    environment:
+      # Pass these variables to your Spring app
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/mydatabase
+      - SPRING_DATASOURCE_USERNAME=myuser
+      - SPRING_DATASOURCE_PASSWORD=mypassword
+      - SPRING_JPA_HIBERATE_DDL_AUTO=update
+
+  # This is your PostgreSQL database
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+    ports:
+      # This exposes the DB to your host (e.g., for debugging)
+      - "5432:5432"
+    volumes:
+      # This makes your database data persist even if the container stops
+      - postgres_data:/var/lib/postgresql/data
+
+# Define the persistent volume
+volumes:
+  postgres_data:
