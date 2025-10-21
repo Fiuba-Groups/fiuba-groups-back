@@ -4,6 +4,7 @@ import com.fiuba_groups.fiuba_groups_back.exception.BadRequestException;
 import com.fiuba_groups.fiuba_groups_back.model.CourseOffering;
 import com.fiuba_groups.fiuba_groups_back.repository.CourseOfferingRepository;
 import com.fiuba_groups.fiuba_groups_back.service.dto.CourseOfferingCreateRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
