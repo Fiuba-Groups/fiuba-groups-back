@@ -16,12 +16,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("groups")
 public class GroupController {
     @Autowired private GroupService groupService;
+
+    @GetMapping
+    public ResponseEntity<List<Group>> getAllGroups() {
+        return ResponseEntity.ok(groupService.getAllGroups());
+    }
 
     @GetMapping("/{groupId}")
     public ResponseEntity<Group> getGroup(@PathVariable Long groupId) {

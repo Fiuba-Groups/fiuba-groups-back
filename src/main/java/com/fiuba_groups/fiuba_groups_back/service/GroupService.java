@@ -10,12 +10,17 @@ import com.fiuba_groups.fiuba_groups_back.service.dto.GroupCreateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
 public class GroupService {
     @Autowired private GroupRepository groupRepository;
     @Autowired private CourseOfferingRepository courseOfferingRepository;
+
+    public List<Group> getAllGroups() {
+        return groupRepository.findAll();
+    }
 
     public Optional<Group> getGroup(Long groupId) {
         return groupRepository.findById(groupId);
