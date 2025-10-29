@@ -101,17 +101,24 @@ public class GroupServiceTest {
     @Test
     public void test05_DeleteExistingGroupSuccessfully() {
         // setup
+        Group existing = new Group();
+        existing.setId(1L);
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(existing));
 
         // request
-
+        Group deleted = groupService.deleteGroup(1L);
+        assertEquals(deleted, existing);
+        List<Group> groups = groupService.getAllGroups();
+        assertEquals(0, groups.size());
     }
 
     @Test
     public void test06_DeleteNonExistingGroupThrowsResourceNotFoundException() {
         // setup
+        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
 
         // request
-
+        assertThrows(ResourceNotFoundException.class, () -> groupService.deleteGroup(1L));
     }
 
     @Test
