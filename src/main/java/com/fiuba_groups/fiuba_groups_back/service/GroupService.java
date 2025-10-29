@@ -43,4 +43,10 @@ public class GroupService {
         newGroup.setCourseOffering(courseOffering);
         return groupRepository.save(newGroup);
     }
+
+    public Group deleteGroup(Long groupId) {
+        Group group = getGroupById(groupId);
+        groupRepository.delete(group);
+        return group;
+    }
 }
