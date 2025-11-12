@@ -27,7 +27,11 @@ public class Group {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String title;
     private String description;
+    private int memberCount = 0;
+    private int maxMembers = 0;
+    private int creatorStudentRegister = 0;
 
     @ManyToOne
     @JoinColumn(name = "course_offering_id")

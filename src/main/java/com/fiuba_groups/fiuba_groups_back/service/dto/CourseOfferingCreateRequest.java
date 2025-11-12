@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class CourseOfferingCreateRequest {
     private String quarter;
+    private String year;
     private String subject;
     private String course;
 }

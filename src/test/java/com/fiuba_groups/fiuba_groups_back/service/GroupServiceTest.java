@@ -47,14 +47,20 @@ public class GroupServiceTest {
 
         Group expected = new Group();
         expected.setId(1L);
+        expected.setTitle("test-title");
         expected.setDescription("test");
+        expected.setMaxMembers(5);
+        expected.setCreatorStudentRegister(12345);
         expected.setCourseOffering(course);
         when(groupRepository.save(any(Group.class))).thenReturn(expected);
 
         // request
         GroupCreateRequest req = new GroupCreateRequest();
         req.setCourseOfferingId(1L);
+        req.setTitle("test-title");
         req.setDescription("test");
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
 
         Group created = groupService.addGroup(req);
 

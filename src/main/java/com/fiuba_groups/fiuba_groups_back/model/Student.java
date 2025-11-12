@@ -23,6 +23,7 @@ public class Student {
     private Long id;
 
     private int register; // padrón
+    private String name;  // nombre completo
 
     @ManyToMany(mappedBy = "members")
     @JsonManagedReference

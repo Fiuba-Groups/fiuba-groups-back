@@ -35,10 +35,25 @@ public class GroupService {
                         .orElseThrow(
                                 () -> new ResourceNotFoundException("CourseOffering not found"));
         Group newGroup = new Group();
+        if (request.getTitle() == null || request.getTitle().isEmpty()) {
+            throw new IllegalArgumentException("Title cannot be null or empty");
+        } else {
+            newGroup.setTitle(request.getTitle());
+        }
         if (request.getDescription() == null || request.getDescription().isEmpty()) {
             throw new IllegalArgumentException("Description cannot be null or empty");
         } else {
             newGroup.setDescription(request.getDescription());
+        }
+        if (request.getMaxMembers() <= 0) {
+            throw new IllegalArgumentException("Max members must be greater than zero");
+        } else {
+            newGroup.setMaxMembers(request.getMaxMembers());
+        }
+        if (request.getCreatorStudentRegister() <= 0) {
+            throw new IllegalArgumentException("The creator student register must be greater than zero");
+        } else {
+            newGroup.setCreatorStudentRegister(request.getCreatorStudentRegister());
         }
         newGroup.setCourseOffering(courseOffering);
         return groupRepository.save(newGroup);
