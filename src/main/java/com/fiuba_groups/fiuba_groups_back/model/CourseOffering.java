@@ -24,6 +24,7 @@ public class CourseOffering {
     private Long id;
 
     private String quarter;
+    private String year;
     private String subject;
     private String course;
 

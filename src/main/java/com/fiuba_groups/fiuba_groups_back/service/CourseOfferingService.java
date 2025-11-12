@@ -20,6 +20,7 @@ public class CourseOfferingService {
 
         CourseOffering newCourseOffering = new CourseOffering();
         newCourseOffering.setQuarter(request.getQuarter());
+        newCourseOffering.setYear(request.getYear());
         newCourseOffering.setSubject(request.getSubject());
         newCourseOffering.setCourse(request.getCourse());
         return courseOfferingRepository.save(newCourseOffering);
