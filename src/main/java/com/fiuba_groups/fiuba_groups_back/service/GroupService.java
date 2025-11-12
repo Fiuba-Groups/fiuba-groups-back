@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class GroupService {
@@ -22,8 +21,11 @@ public class GroupService {
         return groupRepository.findAll();
     }
 
-    public Optional<Group> getGroup(Long groupId) {
-        return groupRepository.findById(groupId);
+    public Group getGroupById(Long groupId) {
+        return groupRepository
+                            .findById(groupId)
+                            .orElseThrow(
+                                    () -> new ResourceNotFoundException("Group with id " + groupId + " not found"));
     }
 
     public Group addGroup(GroupCreateRequest request) {
@@ -33,8 +35,18 @@ public class GroupService {
                         .orElseThrow(
                                 () -> new ResourceNotFoundException("CourseOffering not found"));
         Group newGroup = new Group();
-        newGroup.setDescription(request.getDescription());
+        if (request.getDescription() == null || request.getDescription().isEmpty()) {
+            throw new IllegalArgumentException("Description cannot be null or empty");
+        } else {
+            newGroup.setDescription(request.getDescription());
+        }
         newGroup.setCourseOffering(courseOffering);
         return groupRepository.save(newGroup);
+    }
+
+    public Group deleteGroup(Long groupId) {
+        Group group = getGroupById(groupId);
+        groupRepository.delete(group);
+        return group;
     }
 }

@@ -19,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupServiceTest {
@@ -58,5 +59,94 @@ public class GroupServiceTest {
         Group created = groupService.addGroup(req);
 
         assertEquals(created, expected);
+    }
+
+    @Test
+    public void test02_GetExistingGroupSuccessfully() {
+        // setup
+        Group expected = new Group();
+        expected.setId(1L);
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(expected));
+
+        // request
+        Group found = groupService.getGroupById(1L);
+
+        assertEquals(found, expected);
+    }
+
+    @Test
+    public void test03_GetNonExistingGroupThrowsResourceNotFoundException() {
+        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> groupService.getGroupById(1L));
+    }
+
+    @Test
+    public void test04_GetAllGroupsSuccessfully() {
+        // setup
+        Group group1 = new Group();
+        group1.setId(1L);
+        Group group2 = new Group();
+        group2.setId(2L);
+        when(groupRepository.findAll()).thenReturn(List.of(group1, group2));
+
+        // request
+        List<Group> groups = groupService.getAllGroups();
+
+        assertEquals(2, groups.size());
+        assertEquals(group1, groups.get(0));
+        assertEquals(group2, groups.get(1));
+    }
+
+    @Test
+    public void test05_DeleteExistingGroupSuccessfully() {
+        // setup
+        Group existing = new Group();
+        existing.setId(1L);
+        when(groupRepository.findById(1L)).thenReturn(Optional.of(existing));
+
+        // request
+        Group deleted = groupService.deleteGroup(1L);
+        assertEquals(deleted, existing);
+        List<Group> groups = groupService.getAllGroups();
+        assertEquals(0, groups.size());
+    }
+
+    @Test
+    public void test06_DeleteNonExistingGroupThrowsResourceNotFoundException() {
+        // setup
+        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // request
+        assertThrows(ResourceNotFoundException.class, () -> groupService.deleteGroup(1L));
+    }
+
+    @Test
+    public void test07_AddGroupWithNullDescriptionThrowsIllegalArgumentException() {
+        // setup
+        CourseOffering course = new CourseOffering();
+        course.setId(1L);
+        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.of(course));
+
+        // request
+        GroupCreateRequest req = new GroupCreateRequest();
+        req.setCourseOfferingId(1L);
+        req.setDescription(null);
+
+        assertThrows(IllegalArgumentException.class, () -> groupService.addGroup(req));
+    }
+
+    @Test
+    public void test08_AddGroupWithEmptyDescriptionThrowsIllegalArgumentException() {
+        // setup
+        CourseOffering course = new CourseOffering();
+        course.setId(1L);
+        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.of(course));
+
+        // request
+        GroupCreateRequest req = new GroupCreateRequest();
+        req.setCourseOfferingId(1L);
+        req.setDescription("");
+        assertThrows(IllegalArgumentException.class, () -> groupService.addGroup(req));
     }
 }

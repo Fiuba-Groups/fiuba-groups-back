@@ -31,10 +31,11 @@ public class GroupController {
 
     @GetMapping("/{groupId}")
     public ResponseEntity<Group> getGroup(@PathVariable Long groupId) {
-        return groupService
-                .getGroup(groupId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+        Group group = groupService.getGroupById(groupId);
+        if (group == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.ok(group);
     }
 
     @PostMapping
