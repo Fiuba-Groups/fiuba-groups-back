@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Run tests in development environment
+echo "🧪 Running tests..."
+docker compose -f docker-compose.dev.yaml exec app ./gradlew test

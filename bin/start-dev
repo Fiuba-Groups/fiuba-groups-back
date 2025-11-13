@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Start development environment
+echo "🚀 Starting development environment..."
+docker compose -f docker-compose.dev.yaml up --build

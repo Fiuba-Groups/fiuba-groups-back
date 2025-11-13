@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Stop development environment
+echo "🛑 Stopping development environment..."
+docker compose -f docker-compose.dev.yaml down
