@@ -19,3 +19,16 @@ gradle bootRun
 
 ## swagger
 Se puede ver la documentación de los endpoints en local en [swagger-ui](http://localhost:8080/swagger-ui/index.html) (con la app levantada).
+
+## Development Setup
+
+### Quick Development Commands
+For convenience, use the scripts in the `/bin` folder:
+
+```sh
+./bin/start-dev    # Start development environment (database + app)
+./bin/stop-dev     # Stop development environment
+./bin/test         # Run all tests
+./bin/build        # Build the project
+```
+

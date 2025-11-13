@@ -2,7 +2,9 @@ package com.fiuba_groups.fiuba_groups_back.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,8 +35,12 @@ public class Group {
     private int maxMembers = 0;
     private int creatorStudentRegister = 0;
 
+    @Column(name = "course_offering_id")
+    @JoinColumn(foreignKey = @ForeignKey(name = "fk_group_course_offering"))
+    private Long courseOfferingId;
+
     @ManyToOne
-    @JoinColumn(name = "course_offering_id")
+    @JoinColumn(name = "course_offering_id", insertable = false, updatable = false)
     @JsonBackReference
     private CourseOffering courseOffering;
 
