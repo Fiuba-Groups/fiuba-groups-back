@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8080:8080"
+      - "5123:5005"  # Debug port
     depends_on:
       - db
     environment:
@@ -12,6 +13,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=myuser
       - SPRING_DATASOURCE_PASSWORD=mypassword
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - DEBUG_MODE=true
     volumes:
       - .:/app
       - /app/.gradle

@@ -43,3 +43,12 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootRun {
+	// Enable debug mode when DEBUG_MODE environment variable is set
+	if (System.getenv('DEBUG_MODE') == 'true') {
+		jvmArgs = [
+			'-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005'
+		]
+	}
+}

@@ -19,6 +19,10 @@ public class DataLoader implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        repo.save(new User("admin@fi.uba.ar", encoder.encode("1234")));
+        try {
+              repo.save(new User("admin@fi.uba.ar", encoder.encode("1234")));
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 }

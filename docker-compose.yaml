@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+      - "5005:5005"  # Debug port
     depends_on:
       - db
     environment:
@@ -10,6 +11,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=myuser
       - SPRING_DATASOURCE_PASSWORD=mypassword
       - SPRING_JPA_HIBERATE_DDL_AUTO=update
+      - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
   db:
     image: postgres:16-alpine
     environment:
