@@ -14,23 +14,22 @@ import java.util.List;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain chain)
-            throws ServletException, IOException {
+                                    FilterChain chain) throws IOException, ServletException {
 
-        String authHeader = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            String user = JwtUtil.validateToken(token);
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
+            String email = JwtUtil.validateAndGetEmail(token);
 
-            if (user != null) {
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(user, null, List.of());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            if (email != null) {
+                UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(email, null, List.of());
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
