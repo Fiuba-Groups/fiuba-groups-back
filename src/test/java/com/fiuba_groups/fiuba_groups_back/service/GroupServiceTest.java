@@ -1,158 +1,187 @@
 package com.fiuba_groups.fiuba_groups_back.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
+import com.fiuba_groups.fiuba_groups_back.exception.BadRequestException;
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
+import com.fiuba_groups.fiuba_groups_back.model.Course;
 import com.fiuba_groups.fiuba_groups_back.model.CourseOffering;
 import com.fiuba_groups.fiuba_groups_back.model.Group;
-import com.fiuba_groups.fiuba_groups_back.repository.CourseOfferingRepository;
-import com.fiuba_groups.fiuba_groups_back.repository.GroupRepository;
+import com.fiuba_groups.fiuba_groups_back.service.dto.CourseCreateRequest;
+import com.fiuba_groups.fiuba_groups_back.service.dto.CourseOfferingCreateRequest;
 import com.fiuba_groups.fiuba_groups_back.service.dto.GroupCreateRequest;
+import com.fiuba_groups.fiuba_groups_back.service.dto.SubjectCreateRequest;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.List;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@Transactional
 public class GroupServiceTest {
-    @Mock private GroupRepository groupRepository;
-    @Mock private CourseOfferingRepository courseOfferingRepository;
-    @InjectMocks private GroupService groupService;
+    @Autowired private GroupService groupService;
+    @Autowired private CourseOfferingService courseOfferingService;
+    @Autowired private CourseService courseService;
+    @Autowired private SubjectService subjectService;
 
-    @Test
-    public void test00_GetNonExistingGroupThrowsResourceNotFoundException() {
-        GroupCreateRequest req = new GroupCreateRequest();
-        req.setCourseOfferingId(1L);
-        req.setDescription("test");
+    private CourseOffering testCourseOffering;
 
-        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.empty());
+    @BeforeEach
+    void setUp() {
+        // Create test subject
+        SubjectCreateRequest subjectReq = new SubjectCreateRequest();
+        subjectReq.setCode("CS101");
+        subjectReq.setName("Computer Science");
+        subjectReq.setDepartment("Engineering");
+        subjectService.addSubject(subjectReq);
 
-        assertThrows(ResourceNotFoundException.class, () -> groupService.addGroup(req));
+        // Create test course
+        CourseCreateRequest courseReq = new CourseCreateRequest();
+        courseReq.setCommission("A");
+        courseReq.setActive(true);
+        courseReq.setSubjectCode("CS101");
+        Course course = courseService.addCourse(courseReq);
+
+        // Create test course offering
+        CourseOfferingCreateRequest offeringReq = new CourseOfferingCreateRequest();
+        offeringReq.setQuarter("2024Q1");
+        offeringReq.setYear("2024");
+        offeringReq.setCourseId(course.getId());
+        testCourseOffering = courseOfferingService.addCourseOffering(offeringReq);
     }
 
     @Test
-    public void test01_AddGroupSuccessfullyReturnsTheAddedGroup() {
-        // setup
-        CourseOffering course = new CourseOffering();
-        course.setId(1L);
-        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.of(course));
-
-        Group expected = new Group();
-        expected.setId(1L);
-        expected.setTitle("test-title");
-        expected.setDescription("test");
-        expected.setMaxMembers(5);
-        expected.setCreatorStudentRegister(12345);
-        expected.setCourseOffering(course);
-        when(groupRepository.save(any(Group.class))).thenReturn(expected);
-
-        // request
+    public void test00_AddGroupWithInvalidCourseOfferingIdThrowsBadRequestException() {
         GroupCreateRequest req = new GroupCreateRequest();
-        req.setCourseOfferingId(1L);
-        req.setTitle("test-title");
-        req.setDescription("test");
+        req.setCourseOfferingId(999L); // Non-existent course offering
+        req.setTitle("Test Group");
+        req.setDescription("Test Description");
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
+
+        assertThrows(BadRequestException.class, () -> groupService.addGroup(req));
+    }
+
+    @Test
+    public void test01_AddGroupSuccessfullyWithValidData() {
+        GroupCreateRequest req = new GroupCreateRequest();
+        req.setCourseOfferingId(testCourseOffering.getId());
+        req.setTitle("Test Group");
+        req.setDescription("Test Description");
         req.setMaxMembers(5);
         req.setCreatorStudentRegister(12345);
 
         Group created = groupService.addGroup(req);
 
-        assertEquals(created, expected);
+        assertNotNull(created);
+        assertNotNull(created.getId());
+        assertEquals("Test Group", created.getTitle());
+        assertEquals("Test Description", created.getDescription());
+        assertEquals(5, created.getMaxMembers());
+        assertEquals(12345, created.getCreatorStudentRegister());
+        assertEquals(testCourseOffering.getId(), created.getCourseOfferingId());
     }
 
     @Test
     public void test02_GetExistingGroupSuccessfully() {
-        // setup
-        Group expected = new Group();
-        expected.setId(1L);
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(expected));
+        // Create a group first
+        GroupCreateRequest req = new GroupCreateRequest();
+        req.setCourseOfferingId(testCourseOffering.getId());
+        req.setTitle("Test Group");
+        req.setDescription("Test Description");
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
+        Group created = groupService.addGroup(req);
 
-        // request
-        Group found = groupService.getGroupById(1L);
+        // Retrieve the group
+        Group found = groupService.getGroupById(created.getId());
 
-        assertEquals(found, expected);
+        assertEquals(created.getId(), found.getId());
+        assertEquals("Test Group", found.getTitle());
+        assertEquals("Test Description", found.getDescription());
     }
 
     @Test
     public void test03_GetNonExistingGroupThrowsResourceNotFoundException() {
-        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> groupService.getGroupById(1L));
+        assertThrows(ResourceNotFoundException.class, () -> groupService.getGroupById(999L));
     }
 
     @Test
     public void test04_GetAllGroupsSuccessfully() {
-        // setup
-        Group group1 = new Group();
-        group1.setId(1L);
-        Group group2 = new Group();
-        group2.setId(2L);
-        when(groupRepository.findAll()).thenReturn(List.of(group1, group2));
+        // Create two groups
+        GroupCreateRequest req1 = new GroupCreateRequest();
+        req1.setCourseOfferingId(testCourseOffering.getId());
+        req1.setTitle("Group 1");
+        req1.setDescription("Description 1");
+        req1.setMaxMembers(5);
+        req1.setCreatorStudentRegister(12345);
+        groupService.addGroup(req1);
 
-        // request
+        GroupCreateRequest req2 = new GroupCreateRequest();
+        req2.setCourseOfferingId(testCourseOffering.getId());
+        req2.setTitle("Group 2");
+        req2.setDescription("Description 2");
+        req2.setMaxMembers(8);
+        req2.setCreatorStudentRegister(67890);
+        groupService.addGroup(req2);
+
+        // Get all groups
         List<Group> groups = groupService.getAllGroups();
 
         assertEquals(2, groups.size());
-        assertEquals(group1, groups.get(0));
-        assertEquals(group2, groups.get(1));
     }
 
     @Test
     public void test05_DeleteExistingGroupSuccessfully() {
-        // setup
-        Group existing = new Group();
-        existing.setId(1L);
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(existing));
+        // Create a group first
+        GroupCreateRequest req = new GroupCreateRequest();
+        req.setCourseOfferingId(testCourseOffering.getId());
+        req.setTitle("Test Group");
+        req.setDescription("Test Description");
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
+        Group created = groupService.addGroup(req);
 
-        // request
-        Group deleted = groupService.deleteGroup(1L);
-        assertEquals(deleted, existing);
-        List<Group> groups = groupService.getAllGroups();
-        assertEquals(0, groups.size());
+        // Delete the group
+        Group deleted = groupService.deleteGroup(created.getId());
+        assertEquals(created.getId(), deleted.getId());
+
+        // Verify it's deleted
+        assertThrows(ResourceNotFoundException.class, () -> groupService.getGroupById(created.getId()));
     }
 
     @Test
     public void test06_DeleteNonExistingGroupThrowsResourceNotFoundException() {
-        // setup
-        when(groupRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // request
-        assertThrows(ResourceNotFoundException.class, () -> groupService.deleteGroup(1L));
+        assertThrows(ResourceNotFoundException.class, () -> groupService.deleteGroup(999L));
     }
 
     @Test
     public void test07_AddGroupWithNullDescriptionThrowsIllegalArgumentException() {
-        // setup
-        CourseOffering course = new CourseOffering();
-        course.setId(1L);
-        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.of(course));
-
-        // request
         GroupCreateRequest req = new GroupCreateRequest();
-        req.setCourseOfferingId(1L);
+        req.setCourseOfferingId(testCourseOffering.getId());
+        req.setTitle("Test Group");
         req.setDescription(null);
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
 
         assertThrows(IllegalArgumentException.class, () -> groupService.addGroup(req));
     }
 
     @Test
     public void test08_AddGroupWithEmptyDescriptionThrowsIllegalArgumentException() {
-        // setup
-        CourseOffering course = new CourseOffering();
-        course.setId(1L);
-        when(courseOfferingRepository.findById(1L)).thenReturn(Optional.of(course));
-
-        // request
         GroupCreateRequest req = new GroupCreateRequest();
-        req.setCourseOfferingId(1L);
+        req.setCourseOfferingId(testCourseOffering.getId());
+        req.setTitle("Test Group");
         req.setDescription("");
+        req.setMaxMembers(5);
+        req.setCreatorStudentRegister(12345);
+
         assertThrows(IllegalArgumentException.class, () -> groupService.addGroup(req));
     }
 }

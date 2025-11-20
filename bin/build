@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Build project in development environment
+echo "🔨 Building project..."
+docker compose -f docker-compose.dev.yaml exec app ./gradlew build
