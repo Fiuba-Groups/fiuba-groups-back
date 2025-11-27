@@ -2,11 +2,13 @@ package com.fiuba_groups.fiuba_groups_back.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,4 +30,10 @@ public class Student {
     @ManyToMany(mappedBy = "members")
     @JsonManagedReference
     private List<Group> groups = new ArrayList<Group>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<Grade> grades = new ArrayList<Grade>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<AcademicDocument> documents = new ArrayList<AcademicDocument>();
 }
