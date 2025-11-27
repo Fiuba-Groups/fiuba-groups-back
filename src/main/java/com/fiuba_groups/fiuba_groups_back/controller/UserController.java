@@ -38,4 +38,10 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok("User deleted successfully");
+    }
 }
