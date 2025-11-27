@@ -1,5 +1,6 @@
 package com.fiuba_groups.fiuba_groups_back.service;
 
+import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
 import com.fiuba_groups.fiuba_groups_back.exception.UserAlreadyExistsException;
 import com.fiuba_groups.fiuba_groups_back.exception.NotInstitutionalEmailException;
 import com.fiuba_groups.fiuba_groups_back.model.User;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -40,5 +42,21 @@ public class UserService {
             return user;
         }
         return Optional.empty();
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with email " + email + " not found"));
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id " + id + " not found"));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 }
