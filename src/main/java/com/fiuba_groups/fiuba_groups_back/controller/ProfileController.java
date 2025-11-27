@@ -1,6 +1,7 @@
 package com.fiuba_groups.fiuba_groups_back.controller;
 
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
+import com.fiuba_groups.fiuba_groups_back.model.Group;
 import com.fiuba_groups.fiuba_groups_back.model.Student;
 import com.fiuba_groups.fiuba_groups_back.model.User;
 import com.fiuba_groups.fiuba_groups_back.service.StudentService;
@@ -100,6 +101,26 @@ public class ProfileController {
             }
 
             return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/me/groups")
+    public ResponseEntity<?> getMyGroups(Authentication auth) {
+        try {
+            if (auth == null || auth.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "User not authenticated"));
+            }
+            User user = userService.getUserByEmail(auth.getName());
+            if (user.getStudent() == null) {
+                return ResponseEntity.ok(java.util.Collections.emptyList());
+            }
+            Student student = user.getStudent();
+            List<Group> groups = student.getGroups();
+            return ResponseEntity.ok(groups);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));

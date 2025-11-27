@@ -25,6 +25,30 @@ public class GroupJoinRequestService {
 
     public GroupJoinRequest addGroupJoinRequest(GroupJoinRequestCreateRequest request) {
         try {
+            // Verificar que el grupo existe
+            Group group = groupRepository.findById(request.getGroupId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Group with id " + request.getGroupId() + " not found"));
+
+            // Verificar que el estudiante existe
+            Student student = studentRepository.findById(request.getStudentId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Student with id " + request.getStudentId() + " not found"));
+
+            // Verificar si ya es miembro del grupo
+            if (group.getMembers().contains(student)) {
+                throw new BadRequestException("You are already a member of this group");
+            }
+
+            // Verificar si ya tiene una solicitud pendiente
+            boolean hasPendingRequest = groupJoinRequestRepository
+                    .findByGroupId(request.getGroupId())
+                    .stream()
+                    .anyMatch(r -> r.getStudentId() != null && r.getStudentId().equals(request.getStudentId()));
+            if (hasPendingRequest) {
+                throw new BadRequestException("You already have a pending request for this group");
+            }
+
             GroupJoinRequest newRequest = new GroupJoinRequest();
             newRequest.setGroupId(request.getGroupId());
             newRequest.setStudentId(request.getStudentId());

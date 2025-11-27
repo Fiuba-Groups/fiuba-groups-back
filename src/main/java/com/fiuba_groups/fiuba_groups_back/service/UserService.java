@@ -3,6 +3,7 @@ package com.fiuba_groups.fiuba_groups_back.service;
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
 import com.fiuba_groups.fiuba_groups_back.exception.UserAlreadyExistsException;
 import com.fiuba_groups.fiuba_groups_back.exception.NotInstitutionalEmailException;
+import com.fiuba_groups.fiuba_groups_back.model.Student;
 import com.fiuba_groups.fiuba_groups_back.model.User;
 import com.fiuba_groups.fiuba_groups_back.repository.UserRepository;
 
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.Optional;
 import java.util.List;
 
@@ -33,7 +35,19 @@ public class UserService {
         }
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
-        return userRepository.save(new User(email, hashedPassword));
+        User newUser = new User(email, hashedPassword);
+        
+        // Crear Student automáticamente al registrar
+        Student student = new Student();
+        // Generar un número de padrón único (6 dígitos)
+        student.setRegister(ThreadLocalRandom.current().nextInt(100000, 999999));
+        // Usar la parte del email antes del @ como nombre por defecto
+        String defaultName = email.split("@")[0].replace(".", " ");
+        student.setName(defaultName);
+        
+        newUser.setStudent(student);
+        
+        return userRepository.save(newUser);
     }
 
     public Optional<User> login(String email, String rawPassword) {
