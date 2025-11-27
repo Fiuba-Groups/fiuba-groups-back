@@ -33,4 +33,7 @@ public class Student {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Grade> grades = new ArrayList<Grade>();
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    private List<AcademicDocument> documents = new ArrayList<AcademicDocument>();
 }

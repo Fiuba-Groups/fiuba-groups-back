@@ -1,5 +1,6 @@
 package com.fiuba_groups.fiuba_groups_back.service;
 
+import com.fiuba_groups.fiuba_groups_back.exception.BadRequestException;
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
 import com.fiuba_groups.fiuba_groups_back.model.Grade;
 import com.fiuba_groups.fiuba_groups_back.model.Student;
@@ -43,5 +44,21 @@ public class GradeService {
 
     public List<Grade> getGradesForStudent(Long studentId) {
         return gradeRepository.findByStudentId(studentId);
+    }
+
+    @Transactional
+    public void deleteGrade(User user, Long gradeId) {
+        Grade grade = gradeRepository.findById(gradeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Grade with id " + gradeId + " not found"));
+
+        if (user.getStudent() == null) {
+            throw new BadRequestException("User does not have a student profile");
+        }
+
+        if (!grade.getStudent().getId().equals(user.getStudent().getId())) {
+            throw new BadRequestException("You can only delete your own grades");
+        }
+
+        gradeRepository.delete(grade);
     }
 }

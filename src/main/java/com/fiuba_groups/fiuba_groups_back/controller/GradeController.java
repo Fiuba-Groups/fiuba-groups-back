@@ -1,5 +1,6 @@
 package com.fiuba_groups.fiuba_groups_back.controller;
 
+import com.fiuba_groups.fiuba_groups_back.exception.BadRequestException;
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
 import com.fiuba_groups.fiuba_groups_back.model.Grade;
 import com.fiuba_groups.fiuba_groups_back.model.User;
@@ -105,6 +106,27 @@ public class GradeController {
             return ResponseEntity.ok(response);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{gradeId}")
+    public ResponseEntity<?> deleteGrade(Authentication auth, @PathVariable Long gradeId) {
+        try {
+            if (auth == null || auth.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "User not authenticated"));
+            }
+
+            User user = userService.getUserByEmail(auth.getName());
+            gradeService.deleteGrade(user, gradeId);
+
+            return ResponseEntity.ok(Map.of("message", "Grade deleted successfully"));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
         }
     }
