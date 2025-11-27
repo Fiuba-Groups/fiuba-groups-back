@@ -1,6 +1,8 @@
 package com.fiuba_groups.fiuba_groups_back.controller;
 
 import com.fiuba_groups.fiuba_groups_back.exception.BadRequestException;
+import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
+import com.fiuba_groups.fiuba_groups_back.model.Group;
 import com.fiuba_groups.fiuba_groups_back.model.GroupJoinRequest;
 import com.fiuba_groups.fiuba_groups_back.service.GroupJoinRequestService;
 import com.fiuba_groups.fiuba_groups_back.service.dto.GroupJoinRequestCreateRequest;
@@ -11,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,6 +48,20 @@ public class GroupJoinRequestController {
             GroupJoinRequest created = groupJoinRequestService.addGroupJoinRequest(request);
             URI location = URI.create("/group-join-requests/" + created.getGroupId() + "/" + created.getStudentId());
             return ResponseEntity.created(location).body(created);
+        } catch (BadRequestException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{requestId}/accept")
+    public ResponseEntity<?> acceptGroupJoinRequest(@PathVariable Long requestId) {
+        try {
+            Group updatedGroup = groupJoinRequestService.acceptGroupJoinRequest(requestId);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
         } catch (BadRequestException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", e.getMessage()));
