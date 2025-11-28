@@ -1,5 +1,6 @@
 package com.fiuba_groups.fiuba_groups_back.service;
 
+import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
 import com.fiuba_groups.fiuba_groups_back.exception.UserAlreadyExistsException;
 import com.fiuba_groups.fiuba_groups_back.exception.NotInstitutionalEmailException;
 import com.fiuba_groups.fiuba_groups_back.model.User;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
 import java.util.Optional;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -31,6 +33,10 @@ public class UserService {
             throw new UserAlreadyExistsException("El usuario ya existe");
         }
 
+        if(not_valid_password(rawPassword)) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una simbolo y un número.");
+        }
+
         String hashedPassword = passwordEncoder.encode(rawPassword);
         return userRepository.save(new User(email, hashedPassword));
     }
@@ -41,6 +47,33 @@ public class UserService {
             return user;
         }
         return Optional.empty();
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with email " + email + " not found"));
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with id " + id + " not found"));
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    private boolean not_valid_password(String password) {
+        if (password.length() < 8) {
+            return true;
+        }
+        boolean hasUppercase = !password.equals(password.toLowerCase());
+        boolean hasNumber = password.matches(".*\\d.*");
+        boolean hasSymbol = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
+
+        return !(hasUppercase && hasNumber && hasSymbol);
     }
 
     public void updateUser(String email, UserUpdateRequest req) {
