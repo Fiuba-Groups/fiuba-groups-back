@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Clean development environment (removes database and all data)
+echo "🧹 Cleaning development environment..."
+echo "⚠️  This will delete all data in the database!"
+read -p "Are you sure? (y/N) " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    docker compose -f docker-compose.dev.yaml down -v
+    echo "✅ Environment cleaned! Run bin/start-dev to start fresh."
+else
+    echo "❌ Cancelled."
+fi
