@@ -182,4 +182,45 @@ public class ProfileController {
                     .body(Map.of("error", "Error processing image file"));
         }
     }
+
+    /**
+     * Obtiene el email de un compañero de grupo.
+     * Solo funciona si el usuario actual comparte al menos un grupo con el estudiante solicitado.
+     */
+    @GetMapping("/students/{studentId}/email")
+    public ResponseEntity<?> getTeammateEmail(Authentication auth, @PathVariable Long studentId) {
+        try {
+            if (auth == null || auth.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "User not authenticated"));
+            }
+
+            User currentUser = userService.getUserByEmail(auth.getName());
+            if (currentUser.getStudent() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "User does not have a student profile"));
+            }
+
+            // Verificar que el estudiante solicitado comparte al menos un grupo con el usuario actual
+            Student currentStudent = currentUser.getStudent();
+            List<Group> currentUserGroups = currentStudent.getGroups();
+            
+            boolean sharesGroup = currentUserGroups.stream()
+                    .flatMap(group -> group.getMembers().stream())
+                    .anyMatch(member -> member.getId().equals(studentId));
+
+            if (!sharesGroup) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "You can only get email of teammates in your groups"));
+            }
+
+            // Obtener el email del estudiante solicitado
+            User targetUser = userService.getUserByStudentId(studentId);
+            return ResponseEntity.ok(Map.of("email", targetUser.getEmail()));
+
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 }

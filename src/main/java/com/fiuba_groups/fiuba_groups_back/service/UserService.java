@@ -70,6 +70,12 @@ public class UserService {
                         "User with id " + id + " not found"));
     }
 
+    public User getUserByStudentId(Long studentId) {
+        return userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User with student id " + studentId + " not found"));
+    }
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
