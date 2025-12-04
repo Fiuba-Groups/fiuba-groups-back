@@ -18,7 +18,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PutMapping("/update")
+    @PutMapping("/me")
     public ResponseEntity<?> updateUser(
             @RequestBody UserUpdateRequest request,
             @RequestHeader("Authorization") String authHeader) {
@@ -39,9 +39,20 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteCurrentUser(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.replace("Bearer ", "");
+        String email = JwtUtil.validateAndGetEmail(token);
+
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid token");
+        }
+
+        userService.deleteUserByEmail(email);
+
         return ResponseEntity.ok("User deleted successfully");
     }
 }
