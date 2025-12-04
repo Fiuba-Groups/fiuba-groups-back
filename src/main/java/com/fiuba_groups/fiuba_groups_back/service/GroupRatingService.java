@@ -130,16 +130,6 @@ public class GroupRatingService {
     }
 
     /**
-     * Obtiene el resumen de calificaciones de un estudiante por su padrón (register)
-     */
-    public StudentRatingSummary getStudentRatingSummaryByRegister(int register) {
-        Student student = studentRepository.findByRegister(register)
-                .orElseThrow(() -> new ResourceNotFoundException("Student with register " + register + " not found"));
-        
-        return getStudentRatingSummary(student.getId());
-    }
-
-    /**
      * Obtiene las calificaciones pendientes que un estudiante debe dar en un grupo
      */
     public List<Student> getPendingRatingsForStudent(Long groupId, Long studentId) {

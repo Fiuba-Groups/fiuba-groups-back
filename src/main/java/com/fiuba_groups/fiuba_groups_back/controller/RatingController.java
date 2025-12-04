@@ -78,21 +78,6 @@ public class RatingController {
     }
 
     /**
-     * Obtener resumen de calificaciones de un estudiante por su padrón (register)
-     * GET /students/register/{register}/ratings
-     */
-    @GetMapping("/students/register/{register}/ratings")
-    public ResponseEntity<?> getStudentRatingsByRegister(@PathVariable int register) {
-        try {
-            StudentRatingSummary summary = groupRatingService.getStudentRatingSummaryByRegister(register);
-            return ResponseEntity.ok(summary);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
-        }
-    }
-
-    /**
      * Obtener compañeros pendientes de calificar en un grupo
      * GET /groups/{groupId}/ratings/pending
      */

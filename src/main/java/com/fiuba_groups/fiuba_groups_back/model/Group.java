@@ -1,6 +1,7 @@
 package com.fiuba_groups.fiuba_groups_back.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,6 +36,8 @@ public class Group {
     private String description;
     private int memberCount = 1; // Inicia en 1 porque el creador es miembro
     private int maxMembers = 0;
+    
+    @Column(name = "creator_student_register")
     private int creatorStudentRegister = 0;
 
     @Enumerated(EnumType.STRING)
@@ -47,8 +50,14 @@ public class Group {
 
     @ManyToOne
     @JoinColumn(name = "course_offering_id", insertable = false, updatable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties({"groups", "hibernateLazyInitializer", "handler"})
     private CourseOffering courseOffering;
+
+    // Relación con el estudiante creador para obtener su nombre
+    @ManyToOne
+    @JoinColumn(name = "creator_student_register", referencedColumnName = "register", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"groups", "grades", "documents", "hibernateLazyInitializer", "handler"})
+    private Student creatorStudent;
 
     @ManyToMany
     @JoinTable(
