@@ -94,4 +94,34 @@ public class GroupService {
         groupRepository.delete(group);
         return group;
     }
+
+    /**
+     * Permite a un estudiante salir de un grupo
+     * @param groupId ID del grupo
+     * @param studentId ID del estudiante que quiere salir
+     * @return El grupo actualizado
+     * @throws ResourceNotFoundException si el grupo no existe
+     * @throws BadRequestException si el grupo ya terminó o el estudiante no es miembro
+     */
+    @Transactional
+    public Group leaveGroup(Long groupId, Long studentId) {
+        Group group = getGroupById(groupId);
+        
+        // Verificar que el grupo no esté terminado
+        if (group.getStatus() == GroupStatus.FINISHED) {
+            throw new BadRequestException("Cannot leave a finished group");
+        }
+        
+        // Buscar al estudiante en los miembros del grupo
+        Student studentToRemove = group.getMembers().stream()
+                .filter(member -> member.getId().equals(studentId))
+                .findFirst()
+                .orElseThrow(() -> new BadRequestException("Student is not a member of this group"));
+        
+        // Remover al estudiante del grupo
+        group.getMembers().remove(studentToRemove);
+        group.setMemberCount(group.getMemberCount() - 1);
+        
+        return groupRepository.save(group);
+    }
 }
