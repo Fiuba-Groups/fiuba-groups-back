@@ -115,37 +115,38 @@ INSERT INTO student (id, register, name) VALUES
 -- =====================================================
 -- 5. GROUPS (Grupos de estudio)
 -- =====================================================
+-- NOTE: creator_student_register now uses student ID (not register/padrón number)
 INSERT INTO groups (id, title, description, member_count, max_members, creator_student_register, course_offering_id) VALUES
 -- Groups for Algo I - Méndez (2C 2024)
-(1, 'Grupo TP1 - Listas Enlazadas', 'Buscamos gente para resolver el TP1. Tenemos experiencia en Python.', 3, 4, 108234, 1),
-(2, 'Equipo Recursividad', 'Grupo para practicar ejercicios de recursividad y preparar el parcial.', 2, 5, 108567, 1),
-(3, 'Los Algorítmicos', 'Grupo de estudio para TPs y parciales. Nos juntamos los martes y jueves.', 4, 5, 109123, 1),
+(1, 'Grupo TP1 - Listas Enlazadas', 'Buscamos gente para resolver el TP1. Tenemos experiencia en Python.', 3, 4, 1, 1),
+(2, 'Equipo Recursividad', 'Grupo para practicar ejercicios de recursividad y preparar el parcial.', 2, 5, 2, 1),
+(3, 'Los Algorítmicos', 'Grupo de estudio para TPs y parciales. Nos juntamos los martes y jueves.', 4, 5, 3, 1),
 
 -- Groups for Algo II - Essaya (2C 2024)
-(4, 'Aventureros de C', 'Primer grupo de C! Buscamos compañeros para el TP de ABB.', 2, 4, 109456, 3),
-(5, 'Punteros y Estructuras', 'Grupo avanzado para resolver TPs complejos. Nivel intermedio.', 3, 4, 109789, 3),
+(4, 'Aventureros de C', 'Primer grupo de C! Buscamos compañeros para el TP de ABB.', 2, 4, 4, 3),
+(5, 'Punteros y Estructuras', 'Grupo avanzado para resolver TPs complejos. Nivel intermedio.', 3, 4, 5, 3),
 
 -- Groups for Algo III - Martínez López (2C 2024)
-(6, 'Java Masters', 'Grupo para TPs de Java. Conocimientos de OOP requeridos.', 2, 3, 110012, 5),
-(7, 'Diseño y Testing', 'Enfocados en buenas prácticas, TDD y diseño de software.', 3, 4, 110345, 5),
+(6, 'Java Masters', 'Grupo para TPs de Java. Conocimientos de OOP requeridos.', 2, 3, 6, 5),
+(7, 'Diseño y Testing', 'Enfocados en buenas prácticas, TDD y diseño de software.', 3, 4, 7, 5),
 
 -- Groups for Gestión de Datos - Servetto (2C 2024)
-(8, 'SQL Warriors', 'Grupo para TPs de bases de datos. Buscamos 1 persona más.', 3, 4, 110678, 6),
-(9, 'Data Wizards', 'Especialistas en normalización y diseño de BDs.', 2, 4, 110901, 6),
+(8, 'SQL Warriors', 'Grupo para TPs de bases de datos. Buscamos 1 persona más.', 3, 4, 8, 6),
+(9, 'Data Wizards', 'Especialistas en normalización y diseño de BDs.', 2, 4, 9, 6),
 
 -- Groups for Análisis Matemático II (2C 2024)
-(10, 'Integrales Dobles', 'Estudiamos juntos para los parciales. Nivel: principiante.', 4, 6, 111234, 7),
-(11, 'Matemáticos Pro', 'Grupo avanzado. Resolvemos la guía completa semanalmente.', 3, 5, 111567, 7),
+(10, 'Integrales Dobles', 'Estudiamos juntos para los parciales. Nivel: principiante.', 4, 6, 10, 7),
+(11, 'Matemáticos Pro', 'Grupo avanzado. Resolvemos la guía completa semanalmente.', 3, 5, 11, 7),
 
 -- Groups for Física II (2C 2024)
-(12, 'Campo Eléctrico Team', 'Grupo para resolver problemas de electromagnetismo.', 2, 4, 111890, 8),
+(12, 'Campo Eléctrico Team', 'Grupo para resolver problemas de electromagnetismo.', 2, 4, 12, 8),
 
 -- Groups for Taller I (2C 2024)
-(13, 'Proyecto Conway', 'Implementando el Juego de la Vida. Buscamos 1 más!', 3, 4, 112123, 10),
+(13, 'Proyecto Conway', 'Implementando el Juego de la Vida. Buscamos 1 más!', 3, 4, 13, 10),
 
 -- Groups for next semester (1C 2025)
-(14, 'Algoritmos desde Cero', 'Grupo para arrancar bien Algo I. Principiantes bienvenidos!', 1, 5, 114234, 11),
-(15, 'Python Gang 2025', 'Nuevo grupo para dominar Python desde el inicio.', 2, 4, 113901, 11);
+(14, 'Algoritmos desde Cero', 'Grupo para arrancar bien Algo I. Principiantes bienvenidos!', 1, 5, 20, 11),
+(15, 'Python Gang 2025', 'Nuevo grupo para dominar Python desde el inicio.', 2, 4, 19, 11);
 
 -- =====================================================
 -- 6. GROUP MEMBERS (Miembros de grupos)

@@ -22,6 +22,12 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Getter
+    @Setter
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "student_id", referencedColumnName = "id")
+    private Student student;
+
     public User() { }
 
     public User(String email, String password) {
