@@ -25,7 +25,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Pattern VALID_EMAIL = Pattern.compile("^[A-Za-z0-9._%+-]+@fi\\.uba\\.ar$"); // expresion regular que valida que no este vacio y que sea institucional
 
-    public User register(String email, String rawPassword) {
+    public User register(String email, String rawPassword, String fullName) {
         if (!VALID_EMAIL.matcher(email).matches()) {
             throw new NotInstitutionalEmailException("Solo se permiten correos institucionales @fi.uba.ar");
         }
@@ -41,9 +41,14 @@ public class UserService {
         Student student = new Student();
         // Generar un número de padrón único (6 dígitos)
         student.setRegister(ThreadLocalRandom.current().nextInt(100000, 999999));
-        // Usar la parte del email antes del @ como nombre por defecto
-        String defaultName = email.split("@")[0].replace(".", " ");
-        student.setName(defaultName);
+        // Usar el nombre completo proporcionado, o derivar del email si no hay
+        if (fullName != null && !fullName.trim().isEmpty()) {
+            student.setName(fullName.trim());
+        } else {
+            // Fallback: usar la parte del email antes del @ como nombre por defecto
+            String defaultName = email.split("@")[0].replace(".", " ");
+            student.setName(defaultName);
+        }
         
         newUser.setStudent(student);
         
