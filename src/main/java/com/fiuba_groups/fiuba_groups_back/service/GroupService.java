@@ -96,10 +96,13 @@ public class GroupService {
     }
 
     /**
-     * Permite a un estudiante salir de un grupo
+     * Permite a un estudiante salir de un grupo.
+     * Si el creador abandona y es el único miembro, el grupo se elimina.
+     * Si el creador abandona y hay otros miembros, el ownership se transfiere a otro miembro.
+     * 
      * @param groupId ID del grupo
      * @param studentId ID del estudiante que quiere salir
-     * @return El grupo actualizado
+     * @return El grupo actualizado, o null si el grupo fue eliminado
      * @throws ResourceNotFoundException si el grupo no existe
      * @throws BadRequestException si el grupo ya terminó o el estudiante no es miembro
      */
@@ -118,9 +121,24 @@ public class GroupService {
                 .findFirst()
                 .orElseThrow(() -> new BadRequestException("Student is not a member of this group"));
         
+        // Verificar si el que abandona es el creador
+        boolean isCreator = studentToRemove.getRegister() == group.getCreatorStudentRegister();
+        
+        // Si es el creador y es el único miembro, eliminar el grupo
+        if (isCreator && group.getMembers().size() == 1) {
+            groupRepository.delete(group);
+            return null; // Grupo eliminado
+        }
+        
         // Remover al estudiante del grupo
         group.getMembers().remove(studentToRemove);
         group.setMemberCount(group.getMemberCount() - 1);
+        
+        // Si era el creador, transferir ownership al primer miembro restante
+        if (isCreator && !group.getMembers().isEmpty()) {
+            Student newOwner = group.getMembers().get(0);
+            group.setCreatorStudentRegister(newOwner.getRegister());
+        }
         
         return groupRepository.save(group);
     }

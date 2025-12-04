@@ -87,7 +87,9 @@ public class GroupController {
     }
 
     /**
-     * Salir de un grupo - el usuario actual deja de ser miembro
+     * Salir de un grupo - el usuario actual deja de ser miembro.
+     * Si el creador abandona y es el único miembro, el grupo se elimina.
+     * Si el creador abandona y hay otros miembros, el ownership se transfiere.
      * DELETE /groups/{groupId}/leave
      */
     @DeleteMapping("/{groupId}/leave")
@@ -105,6 +107,15 @@ public class GroupController {
             }
 
             Group updated = groupService.leaveGroup(groupId, user.getStudent().getId());
+            
+            // Si el grupo fue eliminado (creador era el único miembro)
+            if (updated == null) {
+                return ResponseEntity.ok(Map.of(
+                    "message", "Group deleted because you were the only member",
+                    "deleted", true
+                ));
+            }
+            
             return ResponseEntity.ok(updated);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
