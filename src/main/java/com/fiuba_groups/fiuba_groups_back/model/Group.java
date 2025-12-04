@@ -1,6 +1,5 @@
 package com.fiuba_groups.fiuba_groups_back.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
@@ -64,6 +63,6 @@ public class Group {
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id"))
-    @JsonBackReference
+    @JsonIgnoreProperties({"groups", "grades", "documents", "hibernateLazyInitializer", "handler"})
     private List<Student> members = new ArrayList<Student>();
 }

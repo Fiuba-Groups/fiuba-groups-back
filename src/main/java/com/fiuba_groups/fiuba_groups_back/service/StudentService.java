@@ -43,4 +43,9 @@ public class StudentService {
 
         return student;
     }
+
+    @Transactional
+    public Student save(Student student) {
+        return studentRepository.save(student);
+    }
 }

@@ -14,10 +14,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -143,6 +146,40 @@ public class ProfileController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/me/avatar")
+    public ResponseEntity<?> uploadAvatar(Authentication auth, @RequestParam("avatar") MultipartFile file) {
+        try {
+            if (auth == null || auth.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "User not authenticated"));
+            }
+            
+            User user = userService.getUserByEmail(auth.getName());
+            if (user.getStudent() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "User does not have a student profile"));
+            }
+
+            // Convertir la imagen a Base64 Data URL
+            String base64Image = java.util.Base64.getEncoder().encodeToString(file.getBytes());
+            String contentType = file.getContentType() != null ? file.getContentType() : "image/png";
+            String avatarUrl = "data:" + contentType + ";base64," + base64Image;
+
+            // Guardar en el estudiante
+            Student student = user.getStudent();
+            student.setAvatarUrl(avatarUrl);
+            studentService.save(student);
+
+            return ResponseEntity.ok(Map.of("avatarUrl", avatarUrl));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (java.io.IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error processing image file"));
         }
     }
 }

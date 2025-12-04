@@ -3,6 +3,7 @@ package com.fiuba_groups.fiuba_groups_back.model;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,6 +27,9 @@ public class Student {
 
     private int register; // padrón
     private String name;  // nombre completo
+    
+    @Column(columnDefinition = "TEXT")
+    private String avatarUrl; // URL o Base64 de la foto de perfil
 
     @ManyToMany(mappedBy = "members")
     @JsonManagedReference
