@@ -1,6 +1,6 @@
 package com.fiuba_groups.fiuba_groups_back.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,9 +41,10 @@ public class CourseOffering {
 
     @ManyToOne
     @JoinColumn(name = "course_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Course courseEntity;
 
     @OneToMany(mappedBy = "courseOffering")
-    @JsonManagedReference
+    @JsonIgnoreProperties({"courseOffering", "members", "creatorStudent"})
     private List<Group> groups = new ArrayList<Group>();
 }

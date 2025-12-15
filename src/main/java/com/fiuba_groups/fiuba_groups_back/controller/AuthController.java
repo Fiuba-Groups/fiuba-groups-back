@@ -17,7 +17,11 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody LoginRequest request) {
         try {
-            User newUser = userService.register(request.getEmail(), request.getPassword());
+            String fullName = null;
+            if (request.getFirstName() != null && request.getLastName() != null) {
+                fullName = request.getFirstName().trim() + " " + request.getLastName().trim();
+            }
+            User newUser = userService.register(request.getEmail(), request.getPassword(), fullName);
             return ResponseEntity.ok(newUser.getId());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
