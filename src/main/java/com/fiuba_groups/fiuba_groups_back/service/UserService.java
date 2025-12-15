@@ -5,6 +5,7 @@ import com.fiuba_groups.fiuba_groups_back.exception.UserAlreadyExistsException;
 import com.fiuba_groups.fiuba_groups_back.exception.NotInstitutionalEmailException;
 import com.fiuba_groups.fiuba_groups_back.model.Student;
 import com.fiuba_groups.fiuba_groups_back.model.User;
+import com.fiuba_groups.fiuba_groups_back.model.UserUpdateRequest;
 import com.fiuba_groups.fiuba_groups_back.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,10 @@ public class UserService {
 
         if (userRepository.findByEmail(email).isPresent()) {
             throw new UserAlreadyExistsException("El usuario ya existe");
+        }
+
+        if(not_valid_password(rawPassword)) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una simbolo y un número.");
         }
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -83,5 +88,54 @@ public class UserService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    private boolean not_valid_password(String password) {
+        if (password.length() < 8) {
+            return true;
+        }
+        boolean hasUppercase = !password.equals(password.toLowerCase());
+        boolean hasNumber = password.matches(".*\\d.*");
+        boolean hasSymbol = password.matches(".*[!@#$%^&*(),.?\":{}|<>].*");
+
+        return !(hasUppercase && hasNumber && hasSymbol);
+    }
+
+    public void updateUser(String email, UserUpdateRequest req) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (req.getNewPassword() != null && !req.getNewPassword().isBlank()) {
+            if (req.getCurrentPassword() == null)
+                throw new RuntimeException("Debes enviar la contraseña actual para cambiarla");
+
+            if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword()))
+                throw new RuntimeException("La contraseña actual no es correcta");
+
+            if (req.getNewPassword().equals(req.getCurrentPassword()))
+                throw new RuntimeException("La nueva contraseña no puede ser igual a la actual");
+
+            if (!req.getNewPassword().equals(req.getConfirmNewPassword()))
+                throw new RuntimeException("La confirmación de la nueva contraseña no coincide");
+
+            user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        }
+
+        userRepository.save(user);
+    }
+
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found");
+        }
+
+        userRepository.deleteById(userId);
+    }
+
+    public void deleteUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        userRepository.delete(user);
     }
 }
