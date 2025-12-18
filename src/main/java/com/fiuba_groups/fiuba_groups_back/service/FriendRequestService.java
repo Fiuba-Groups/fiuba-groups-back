@@ -109,7 +109,28 @@ public class FriendRequestService {
         
         request.setStatus(FriendRequest.Status.ACCEPTED);
         request.setRespondedAt(LocalDateTime.now());
-        
+
+        // Mantener la relación bidireccional de amigos en la entidad Student
+        Student sender = studentRepository.findById(request.getSenderId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Estudiante con id " + request.getSenderId() + " no encontrado"));
+
+        Student receiver = studentRepository.findById(request.getReceiverId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Estudiante con id " + request.getReceiverId() + " no encontrado"));
+
+        // Evitar duplicados
+        if (!sender.getFriends().contains(receiver)) {
+            sender.getFriends().add(receiver);
+        }
+        if (!receiver.getFriends().contains(sender)) {
+            receiver.getFriends().add(sender);
+        }
+
+        // Guardar los cambios en students y en la solicitud
+        studentRepository.save(sender);
+        studentRepository.save(receiver);
+
         return friendRequestRepository.save(request);
     }
 
@@ -162,18 +183,11 @@ public class FriendRequestService {
      * Obtiene la lista de amigos de un estudiante
      */
     public List<Student> getFriends(Long studentId) {
-        List<FriendRequest> acceptedRequests = friendRequestRepository.findAcceptedFriendships(studentId);
-        
-        return acceptedRequests.stream()
-                .map(request -> {
-                    // El amigo es el otro estudiante en la relación
-                    Long friendId = request.getSenderId().equals(studentId) 
-                            ? request.getReceiverId() 
-                            : request.getSenderId();
-                    return studentRepository.findById(friendId).orElse(null);
-                })
-                .filter(student -> student != null)
-                .collect(Collectors.toList());
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Estudiante con id " + studentId + " no encontrado"));
+
+    // Devolver copia para evitar modificaciones accidentales del entity list en capa superior
+    return student.getFriends().stream().collect(Collectors.toList());
     }
 
     /**
@@ -185,8 +199,20 @@ public class FriendRequestService {
                 .findBetweenStudentsWithStatus(studentId, friendId, FriendRequest.Status.ACCEPTED)
                 .orElseThrow(() -> new ResourceNotFoundException("Amistad no encontrada"));
         
-        friendRequestRepository.delete(friendship);
-        friendRequestRepository.flush();
+    // Eliminar la entidad de friendship y además actualizar la relación many-to-many
+    friendRequestRepository.delete(friendship);
+    friendRequestRepository.flush();
+
+    Student s1 = studentRepository.findById(studentId)
+        .orElseThrow(() -> new ResourceNotFoundException("Estudiante con id " + studentId + " no encontrado"));
+    Student s2 = studentRepository.findById(friendId)
+        .orElseThrow(() -> new ResourceNotFoundException("Estudiante con id " + friendId + " no encontrado"));
+
+    s1.getFriends().removeIf(f -> f.getId().equals(friendId));
+    s2.getFriends().removeIf(f -> f.getId().equals(studentId));
+
+    studentRepository.save(s1);
+    studentRepository.save(s2);
     }
 
     /**

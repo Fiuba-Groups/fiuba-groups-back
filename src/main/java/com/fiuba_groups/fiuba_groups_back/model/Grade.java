@@ -1,5 +1,7 @@
 package com.fiuba_groups.fiuba_groups_back.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,5 +29,6 @@ public class Grade {
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
+    @JsonIgnore
     private Student student;
 }

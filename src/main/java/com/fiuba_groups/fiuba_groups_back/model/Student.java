@@ -1,6 +1,7 @@
 package com.fiuba_groups.fiuba_groups_back.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -45,4 +46,13 @@ public class Student {
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<AcademicDocument> documents = new ArrayList<AcademicDocument>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "student_friends",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "friend_id")
+    )
+    @JsonIgnoreProperties({"groups", "grades", "documents", "showcasedGroups", "hibernateLazyInitializer", "handler", "friends"})
+    private List<Student> friends = new ArrayList<Student>();
 }
