@@ -1,11 +1,15 @@
 package com.fiuba_groups.fiuba_groups_back.controller;
 
 import com.fiuba_groups.fiuba_groups_back.exception.ResourceNotFoundException;
+import com.fiuba_groups.fiuba_groups_back.model.Course;
+import com.fiuba_groups.fiuba_groups_back.model.CourseOffering;
 import com.fiuba_groups.fiuba_groups_back.model.Group;
+import com.fiuba_groups.fiuba_groups_back.model.ShowcasedGroup;
 import com.fiuba_groups.fiuba_groups_back.model.Student;
 import com.fiuba_groups.fiuba_groups_back.model.User;
 import com.fiuba_groups.fiuba_groups_back.service.StudentService;
 import com.fiuba_groups.fiuba_groups_back.service.UserService;
+import com.fiuba_groups.fiuba_groups_back.service.dto.ShowcasedGroupRequest;
 import com.fiuba_groups.fiuba_groups_back.service.dto.StudentUpdateRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,12 +39,38 @@ public class ProfileController {
     @Autowired
     private StudentService studentService;
 
-    private List<Map<String, Object>> mapGroups(List<Group> groups) {
-        return groups.stream().map(g -> {
+    private List<Map<String, Object>> mapShowcasedGroups(List<ShowcasedGroup> showcasedGroups) {
+        return showcasedGroups.stream().map(sg -> {
             Map<String, Object> map = new java.util.HashMap<>();
+            Group g = sg.getGroup();
             map.put("id", g.getId());
             map.put("title", g.getTitle());
-            map.put("description", g.getDescription() != null ? g.getDescription() : "");
+            map.put("description", sg.getDescription() != null ? sg.getDescription() : "");
+            
+            if (g.getCourseOffering() != null) {
+                CourseOffering co = g.getCourseOffering();
+                map.put("semester", co.getQuarter() + " " + co.getYear());
+                
+                if (co.getCourseEntity() != null) {
+                    Course c = co.getCourseEntity();
+                    map.put("course", c.getCommission());
+                    
+                    if (c.getSubject() != null) {
+                        map.put("subject", c.getSubject().getName());
+                    }
+                }
+            }
+
+            List<Map<String, Object>> members = g.getMembers().stream().map(m -> {
+                Map<String, Object> memberMap = new java.util.HashMap<>();
+                memberMap.put("id", m.getId());
+                memberMap.put("name", m.getName());
+                memberMap.put("register", m.getRegister());
+                memberMap.put("avatarUrl", m.getAvatarUrl());
+                return memberMap;
+            }).toList();
+            map.put("members", members);
+
             return map;
         }).toList();
     }
@@ -64,7 +94,7 @@ public class ProfileController {
                 studentMap.put("id", student.getId());
                 studentMap.put("register", student.getRegister());
                 studentMap.put("name", student.getName());
-                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                studentMap.put("showcasedGroups", mapShowcasedGroups(student.getShowcasedGroups()));
                 response.put("student", studentMap);
             }
 
@@ -90,7 +120,7 @@ public class ProfileController {
                         studentMap.put("id", student.getId());
                         studentMap.put("register", student.getRegister());
                         studentMap.put("name", student.getName());
-                        studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                        studentMap.put("showcasedGroups", mapShowcasedGroups(student.getShowcasedGroups()));
                         userMap.put("student", studentMap);
                     }
 
@@ -124,7 +154,7 @@ public class ProfileController {
                 studentMap.put("id", student.getId());
                 studentMap.put("register", student.getRegister());
                 studentMap.put("name", student.getName());
-                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                studentMap.put("showcasedGroups", mapShowcasedGroups(student.getShowcasedGroups()));
                 response.put("student", studentMap);
             }
 
@@ -264,7 +294,7 @@ public class ProfileController {
                 studentMap.put("id", student.getId());
                 studentMap.put("register", student.getRegister());
                 studentMap.put("name", student.getName());
-                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                studentMap.put("showcasedGroups", mapShowcasedGroups(student.getShowcasedGroups()));
                 response.put("student", studentMap);
             }
 
@@ -276,7 +306,7 @@ public class ProfileController {
     }
 
     @PutMapping("/me/showcased-groups")
-    public ResponseEntity<?> updateShowcasedGroups(Authentication auth, @RequestBody List<Long> groupIds) {
+    public ResponseEntity<?> updateShowcasedGroups(Authentication auth, @RequestBody List<ShowcasedGroupRequest> requests) {
         try {
             if (auth == null || auth.getName() == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -288,9 +318,9 @@ public class ProfileController {
                         .body(Map.of("error", "User does not have a student profile"));
             }
 
-            Student student = studentService.updateShowcasedGroups(user.getStudent().getId(), groupIds);
+            Student student = studentService.updateShowcasedGroups(user.getStudent().getId(), requests);
             
-            return ResponseEntity.ok(mapGroups(student.getShowcasedGroups()));
+            return ResponseEntity.ok(mapShowcasedGroups(student.getShowcasedGroups()));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));

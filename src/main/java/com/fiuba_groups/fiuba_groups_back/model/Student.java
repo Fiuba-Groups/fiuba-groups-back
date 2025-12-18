@@ -37,12 +37,8 @@ public class Student {
     @JsonManagedReference
     private List<Group> groups = new ArrayList<Group>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "student_showcased_groups",
-            joinColumns = @JoinColumn(name = "student_id"),
-            inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private List<Group> showcasedGroups = new ArrayList<Group>();
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShowcasedGroup> showcasedGroups = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Grade> grades = new ArrayList<Grade>();
