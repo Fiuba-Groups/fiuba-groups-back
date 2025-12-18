@@ -112,4 +112,11 @@ public class GroupJoinRequestService {
 
         return updatedGroup;
     }
+
+    public void deleteGroupJoinRequest(Long requestId) {
+        if (!groupJoinRequestRepository.existsById(requestId)) {
+            throw new ResourceNotFoundException("Group join request with id " + requestId + " not found");
+        }
+        groupJoinRequestRepository.deleteById(requestId);
+    }
 }
