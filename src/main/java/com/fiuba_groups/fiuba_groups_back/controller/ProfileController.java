@@ -35,6 +35,16 @@ public class ProfileController {
     @Autowired
     private StudentService studentService;
 
+    private List<Map<String, Object>> mapGroups(List<Group> groups) {
+        return groups.stream().map(g -> {
+            Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", g.getId());
+            map.put("title", g.getTitle());
+            map.put("description", g.getDescription() != null ? g.getDescription() : "");
+            return map;
+        }).toList();
+    }
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(Authentication auth) {
         try {
@@ -50,10 +60,12 @@ public class ProfileController {
 
             if (user.getStudent() != null) {
                 Student student = user.getStudent();
-                response.put("student", Map.of(
-                        "id", student.getId(),
-                        "register", student.getRegister(),
-                        "name", student.getName()));
+                Map<String, Object> studentMap = new java.util.HashMap<>();
+                studentMap.put("id", student.getId());
+                studentMap.put("register", student.getRegister());
+                studentMap.put("name", student.getName());
+                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                response.put("student", studentMap);
             }
 
             return ResponseEntity.ok(response);
@@ -74,10 +86,12 @@ public class ProfileController {
 
                     if (user.getStudent() != null) {
                         Student student = user.getStudent();
-                        userMap.put("student", Map.of(
-                                "id", student.getId(),
-                                "register", student.getRegister(),
-                                "name", student.getName()));
+                        Map<String, Object> studentMap = new java.util.HashMap<>();
+                        studentMap.put("id", student.getId());
+                        studentMap.put("register", student.getRegister());
+                        studentMap.put("name", student.getName());
+                        studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                        userMap.put("student", studentMap);
                     }
 
                     return userMap;
@@ -106,10 +120,12 @@ public class ProfileController {
 
             if (user.getStudent() != null) {
                 Student student = user.getStudent();
-                response.put("student", Map.of(
-                        "id", student.getId(),
-                        "register", student.getRegister(),
-                        "name", student.getName()));
+                Map<String, Object> studentMap = new java.util.HashMap<>();
+                studentMap.put("id", student.getId());
+                studentMap.put("register", student.getRegister());
+                studentMap.put("name", student.getName());
+                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                response.put("student", studentMap);
             }
 
             return ResponseEntity.ok(response);
@@ -244,16 +260,43 @@ public class ProfileController {
 
             if (user.getStudent() != null) {
                 Student student = user.getStudent();
-                response.put("student", Map.of(
-                        "id", student.getId(),
-                        "register", student.getRegister(),
-                        "name", student.getName()));
+                Map<String, Object> studentMap = new java.util.HashMap<>();
+                studentMap.put("id", student.getId());
+                studentMap.put("register", student.getRegister());
+                studentMap.put("name", student.getName());
+                studentMap.put("showcasedGroups", mapGroups(student.getShowcasedGroups()));
+                response.put("student", studentMap);
             }
 
             return ResponseEntity.ok(response);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Usuario no encontrado"));
+        }
+    }
+
+    @PutMapping("/me/showcased-groups")
+    public ResponseEntity<?> updateShowcasedGroups(Authentication auth, @RequestBody List<Long> groupIds) {
+        try {
+            if (auth == null || auth.getName() == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "User not authenticated"));
+            }
+            User user = userService.getUserByEmail(auth.getName());
+            if (user.getStudent() == null) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "User does not have a student profile"));
+            }
+
+            Student student = studentService.updateShowcasedGroups(user.getStudent().getId(), groupIds);
+            
+            return ResponseEntity.ok(mapGroups(student.getShowcasedGroups()));
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 }

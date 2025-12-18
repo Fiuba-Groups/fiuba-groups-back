@@ -8,6 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 
@@ -34,6 +36,13 @@ public class Student {
     @ManyToMany(mappedBy = "members")
     @JsonManagedReference
     private List<Group> groups = new ArrayList<Group>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "student_showcased_groups",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id"))
+    private List<Group> showcasedGroups = new ArrayList<Group>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private List<Grade> grades = new ArrayList<Grade>();
