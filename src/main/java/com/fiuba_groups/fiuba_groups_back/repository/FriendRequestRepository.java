@@ -16,12 +16,14 @@ public interface FriendRequestRepository extends JpaRepository<FriendRequest, Lo
     /**
      * Busca solicitudes enviadas por un estudiante
      */
-    List<FriendRequest> findBySenderId(Long senderId);
+    @Query("SELECT fr FROM FriendRequest fr JOIN FETCH fr.sender JOIN FETCH fr.receiver WHERE fr.senderId = :senderId")
+    List<FriendRequest> findBySenderId(@Param("senderId") Long senderId);
     
     /**
      * Busca solicitudes recibidas por un estudiante
      */
-    List<FriendRequest> findByReceiverId(Long receiverId);
+    @Query("SELECT fr FROM FriendRequest fr JOIN FETCH fr.sender JOIN FETCH fr.receiver WHERE fr.receiverId = :receiverId")
+    List<FriendRequest> findByReceiverId(@Param("receiverId") Long receiverId);
     
     /**
      * Busca solicitudes enviadas por un estudiante con un estado específico

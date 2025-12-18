@@ -55,7 +55,7 @@ public class Group {
     // Relación con el estudiante creador para obtener su nombre
     @ManyToOne
     @JoinColumn(name = "creator_student_register", referencedColumnName = "register", insertable = false, updatable = false)
-    @JsonIgnoreProperties({"groups", "grades", "documents", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"groups", "grades", "documents", "showcasedGroups", "hibernateLazyInitializer", "handler"})
     private Student creatorStudent;
 
     @ManyToMany
@@ -63,6 +63,6 @@ public class Group {
             name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id"))
-    @JsonIgnoreProperties({"groups", "grades", "documents", "hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"groups", "grades", "documents", "showcasedGroups", "hibernateLazyInitializer", "handler"})
     private List<Student> members = new ArrayList<Student>();
 }

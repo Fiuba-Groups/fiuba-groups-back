@@ -29,6 +29,7 @@ public class FriendRequestService {
     /**
      * Envía una solicitud de amistad
      */
+    @Transactional
     public FriendRequest sendFriendRequest(Long senderId, FriendRequestCreateRequest request) {
         Long receiverId = request.getReceiverId();
         
@@ -54,7 +55,7 @@ public class FriendRequestService {
         
         try {
             FriendRequest friendRequest = new FriendRequest(senderId, receiverId);
-            return friendRequestRepository.save(friendRequest);
+            return friendRequestRepository.saveAndFlush(friendRequest);
         } catch (DataIntegrityViolationException e) {
             throw new BadRequestException("Error al crear la solicitud de amistad");
         }
@@ -185,6 +186,7 @@ public class FriendRequestService {
                 .orElseThrow(() -> new ResourceNotFoundException("Amistad no encontrada"));
         
         friendRequestRepository.delete(friendship);
+        friendRequestRepository.flush();
     }
 
     /**
