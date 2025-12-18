@@ -10,4 +10,5 @@ public class LoginRequest {
     private String password;
     private String firstName;  // Para registro
     private String lastName;   // Para registro
+    private Integer padron;    // Para registro
 }

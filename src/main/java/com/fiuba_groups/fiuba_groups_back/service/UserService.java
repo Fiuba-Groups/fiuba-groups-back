@@ -13,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.regex.Pattern;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.Optional;
 import java.util.List;
 
@@ -26,7 +25,7 @@ public class UserService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     private static final Pattern VALID_EMAIL = Pattern.compile("^[A-Za-z0-9._%+-]+@fi\\.uba\\.ar$"); // expresion regular que valida que no este vacio y que sea institucional
 
-    public User register(String email, String rawPassword, String fullName) {
+    public User register(String email, String rawPassword, String fullName, Integer padron) {
         if (!VALID_EMAIL.matcher(email).matches()) {
             throw new NotInstitutionalEmailException("Solo se permiten correos institucionales @fi.uba.ar");
         }
@@ -35,8 +34,12 @@ public class UserService {
             throw new UserAlreadyExistsException("El usuario ya existe");
         }
 
-        if(not_valid_password(rawPassword)) {
+        if (not_valid_password(rawPassword)) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres, incluyendo una mayúscula, una simbolo y un número.");
+        }
+        
+        if (padron == null) {
+            throw new IllegalArgumentException("El padrón es obligatorio");
         }
 
         String hashedPassword = passwordEncoder.encode(rawPassword);
@@ -44,8 +47,7 @@ public class UserService {
         
         // Crear Student automáticamente al registrar
         Student student = new Student();
-        // Generar un número de padrón único (6 dígitos)
-        student.setRegister(ThreadLocalRandom.current().nextInt(100000, 999999));
+        student.setRegister(padron);
         // Usar el nombre completo proporcionado, o derivar del email si no hay
         if (fullName != null && !fullName.trim().isEmpty()) {
             student.setName(fullName.trim());
