@@ -89,7 +89,16 @@ public class ProfileController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable Long id) {
         try {
-            User user = userService.getUserById(id);
+            // Intentar buscar por ID de usuario primero
+            User user;
+            try {
+                user = userService.getUserById(id);
+            } catch (ResourceNotFoundException e) {
+                // Si no se encuentra por ID de usuario, intentar por ID de estudiante
+                // Esto es necesario porque el frontend a veces usa el ID del estudiante (friend.id)
+                // como si fuera el ID del usuario en las rutas /user/:userId
+                user = userService.getUserByStudentId(id);
+            }
 
             Map<String, Object> response = new java.util.HashMap<>();
             response.put("id", user.getId());
@@ -106,7 +115,7 @@ public class ProfileController {
             return ResponseEntity.ok(response);
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("error", "Usuario no encontrado"));
         }
     }
 
@@ -221,6 +230,30 @@ public class ProfileController {
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/student/{studentId}")
+    public ResponseEntity<?> getUserByStudentId(@PathVariable Long studentId) {
+        try {
+            User user = userService.getUserByStudentId(studentId);
+
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("id", user.getId());
+            response.put("email", user.getEmail());
+
+            if (user.getStudent() != null) {
+                Student student = user.getStudent();
+                response.put("student", Map.of(
+                        "id", student.getId(),
+                        "register", student.getRegister(),
+                        "name", student.getName()));
+            }
+
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Usuario no encontrado"));
         }
     }
 }
