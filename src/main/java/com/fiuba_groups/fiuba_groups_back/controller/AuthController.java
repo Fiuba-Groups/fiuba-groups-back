@@ -22,7 +22,7 @@ public class AuthController {
             if (request.getFirstName() != null && request.getLastName() != null) {
                 fullName = request.getFirstName().trim() + " " + request.getLastName().trim();
             }
-            User newUser = userService.register(request.getEmail(), request.getPassword(), fullName);
+            User newUser = userService.register(request.getEmail(), request.getPassword(), fullName, request.getPadron());
             return ResponseEntity.ok(newUser.getId());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
